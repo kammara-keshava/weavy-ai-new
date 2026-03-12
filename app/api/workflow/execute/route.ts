@@ -1,7 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
-import { WorkflowExecutor } from '@/lib/workflow-execution';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +12,11 @@ const executeWorkflowSchema = z.object({
 });
 
 export async function POST(request: NextRequest) {
+  // dynamic imports to avoid build-time side effects
+  const { auth } = await import('@clerk/nextjs/server');
+  const { prisma } = await import('@/lib/prisma');
+  const { WorkflowExecutor } = await import('@/lib/workflow-execution');
+
   try {
     const { userId } = await auth();
     if (!userId) {

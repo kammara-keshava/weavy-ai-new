@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +7,7 @@ export const dynamic = 'force-dynamic';
  * This endpoint is no longer used in the workflow executor
  */
 export async function POST(request: NextRequest) {
+  const { auth } = await import('@clerk/nextjs/server');
   try {
     const { userId } = await auth();
     if (!userId) {

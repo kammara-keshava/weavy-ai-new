@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
 export async function GET(request: NextRequest) {
+  const { auth } = await import('@clerk/nextjs/server');
+  const { prisma } = await import('@/lib/prisma');
   try {
     const { userId } = await auth();
     if (!userId) {

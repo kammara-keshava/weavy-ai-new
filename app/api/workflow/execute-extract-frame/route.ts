@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -15,6 +14,7 @@ const schema = z.object({
  * Keeping this route for backward compatibility
  */
 export async function POST(request: NextRequest) {
+  const { auth } = await import('@clerk/nextjs/server');
   try {
     const { userId } = await auth();
     if (!userId) {
