@@ -65,25 +65,32 @@ export function CropImageNode({ id, data }: NodeProps<NodeData>) {
     setRunning(true);
     updateNodeData(id, { running: true });
     try {
-      const response = await fetch('/api/workflow/execute-crop-image', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nodeId: id,
-          image_url: effectiveImageUrl,
-          x_percent: xPercent,
-          y_percent: yPercent,
-          width_percent: widthPercent,
-          height_percent: heightPercent,
-        }),
-      });
+      const response = await fetch('/api/workflow/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nodeIds: [id],
+        type: "single",
+        nodes,
+        edges
+      }),
+    });
 
       const result = await response.json();
+      console.log(result);
       if (!response.ok) {
         throw new Error(result.error || 'Crop image execution failed');
       }
-      setOutput(result.output);
-      updateNodeData(id, { output: result.output, running: false });
+
+      const nodeResult = result.nodeResults?.find((n: any) => n.nodeId === id);
+      const output = nodeResult?.outputs?.output;
+
+      if (!output) {
+        throw new Error("No output returned from workflow");
+      }
+
+      setOutput(output);
+      updateNodeData(id, { output, running: false });
     } catch (error) {
       console.error('Crop image error:', error);
       alert(error instanceof Error ? error.message : 'Failed to crop image. Please try again.');

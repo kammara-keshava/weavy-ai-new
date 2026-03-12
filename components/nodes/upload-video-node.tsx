@@ -39,7 +39,7 @@ export function UploadVideoNode({ id, data }: NodeProps<NodeData>) {
         if (!response.ok) {
           throw new Error(result.error || 'Upload failed');
         }
-        const url = result.url ?? `/uploads/${result.fileName ?? file.name}`;
+        const url = result.url;
         updateNodeData(id, {
           videoUrl: url,
           output: url, // Also set output for downstream nodes

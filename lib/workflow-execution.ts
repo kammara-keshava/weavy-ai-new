@@ -1,5 +1,8 @@
+import "server-only";
 import { WorkflowNode, WorkflowEdge } from '@/types/workflow';
 import { WorkflowExecutionResult, NodeExecutionResult, ExecutionType } from '@/types/execution';
+import { tasks, runs } from "@trigger.dev/sdk/v3";
+
 
 export class WorkflowExecutor {
   private nodes: WorkflowNode[];
@@ -14,43 +17,37 @@ export class WorkflowExecutor {
    * Trigger a Trigger.dev task via HTTP API
    */
   private async triggerTask(
-    taskId: string,
-    payload: Record<string, any>
-  ): Promise<Record<string, any>> {
-    const apiKey = process.env.TRIGGER_API_KEY;
-    if (!apiKey) {
-      throw new Error('TRIGGER_API_KEY environment variable is not set');
+  taskId: string,
+  payload: Record<string, any>
+): Promise<Record<string, any>> {
+
+  // trigger the task
+  const run = await tasks.trigger(taskId, payload);
+
+  // poll until the run finishes
+  while (true) {
+    const result = await runs.retrieve(run.id);
+
+    if (result.status === "COMPLETED") {
+      if (!result.output) {
+        throw new Error("Trigger.dev task returned no output");
+      }
+      return result.output as Record<string, any>;
     }
 
-    try {
-      const response = await fetch('https://api.trigger.dev/api/v1/tasks/trigger', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${apiKey}`,
-        },
-        body: JSON.stringify({
-          id: taskId,
-          payload: payload,
-        }),
-      });
+  if (result.status === "FAILED") {
+  const err =
+    typeof result.error === "string"
+      ? result.error
+      : result.error?.message || "Trigger.dev task failed";
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(
-          `Trigger.dev task failed: ${error.message || response.statusText}`
-        );
-      }
+  throw new Error(err);
+}
 
-      const result = await response.json();
-      return result.output || result;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Trigger.dev API error: ${error.message}`);
-      }
-      throw error;
-    }
+    // wait before checking again
+    await new Promise((r) => setTimeout(r, 1000));
   }
+}
 
   /**
    * Get all nodes that a given node depends on (upstream dependencies)
@@ -266,8 +263,9 @@ export class WorkflowExecutor {
           break;
       }
     } catch (e: any) {
-      error = e.message || 'Unknown error during node execution';
-    }
+  console.error("ExtractFrame task error:", e);
+  error = e?.message || JSON.stringify(e) || 'Unknown error during node execution';
+}
 
     const duration = Date.now() - startTime;
 

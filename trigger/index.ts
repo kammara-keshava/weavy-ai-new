@@ -1,16 +1,28 @@
 import { task } from '@trigger.dev/sdk/v3';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import sharp from 'sharp';
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+
 const ffmpeg = require('fluent-ffmpeg');
 import ffmpegPath from 'ffmpeg-static';
 import { tmpdir } from 'os';
 import { writeFile, unlink } from 'fs/promises';
 import path from 'path';
+import { existsSync } from 'fs';
 
-// Configure FFmpeg
-if (ffmpegPath) {
-  ffmpeg.setFfmpegPath(ffmpegPath);
+// Configure FFmpeg - try ffmpeg-static first, fallback to system ffmpeg
+const resolveFFmpegPath = () => {
+  if (ffmpegPath && existsSync(ffmpegPath)) {
+    return ffmpegPath;
+  }
+  // In Trigger.dev environments, ffmpeg might be installed globally or via system dependencies
+  // Return undefined to let ffmpeg use system PATH
+  console.log('Using system FFmpeg from PATH');
+  return undefined;
+};
+
+const ffmpegBinaryPath = resolveFFmpegPath();
+if (ffmpegBinaryPath) {
+  ffmpeg.setFfmpegPath(ffmpegBinaryPath);
 }
 
 const GEMINI_MODEL = 'gemini-1.5-flash-latest';
@@ -88,12 +100,17 @@ export const executeCropImageTask = task({
     }
 
     // Download image
-    const response = await fetch(payload.image_url);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image from ${payload.image_url}`);
-    }
+    const response = await fetch(payload.image_url, {
+    headers: {
+      "User-Agent": "Trigger.dev Worker",
+    },
+  });
 
-    const buffer = Buffer.from(await response.arrayBuffer());
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.status}`);
+  }
+
+  const buffer = Buffer.from(await response.arrayBuffer());
     const meta = await sharp(buffer).metadata();
 
     const w = meta.width || 100;
@@ -134,8 +151,17 @@ export const executeExtractFrameTask = task({
       throw new Error('Video URL is required');
     }
 
+    // Verify FFmpeg is available
+    if (!ffmpegBinaryPath) {
+      console.log('FFmpeg binary path not set, will use system PATH');
+    }
+
     // Download video to temp file
-    const videoResponse = await fetch(payload.video_url);
+    const videoResponse = await fetch(payload.video_url, {
+      headers: {
+        "User-Agent": "Trigger.dev Worker",
+      },
+    });
     if (!videoResponse.ok) {
       throw new Error(`Failed to fetch video from ${payload.video_url}`);
     }
@@ -152,40 +178,60 @@ export const executeExtractFrameTask = task({
       let seconds = 0;
 
       if (tsString.endsWith('%')) {
-        // Percentage - need to get duration first
-        seconds = Number(tsString.replace('%', '')) / 100; // Will be used as percentage
+        const percent = parseFloat(tsString.replace('%', ''));
+
+        const duration = await new Promise<number>((resolve, reject) => {
+          ffmpeg.ffprobe(tempVideoPath, (err: Error, metadata: any) => {
+            if (err) return reject(err);
+            resolve(metadata.format.duration || 0);
+          });
+        });
+
+        seconds = (percent / 100) * duration;
       } else {
         seconds = Number(tsString) || 0;
       }
 
+      seconds = Math.max(0, seconds);
+
+      if (isNaN(seconds)) {
+        throw new Error("Invalid timestamp");
+      }
       // Extract frame using FFmpeg
       await new Promise<void>((resolve, reject) => {
-        ffmpeg(tempVideoPath)
-          .on('filenames', (filenames: string[]) => {
-            console.log('Frame extracted:', filenames[0]);
-          })
-          .on('end', () => {
-            resolve();
-          })
-          .on('error', (err: Error) => {
-            reject(new Error(`FFmpeg error: ${err.message}`));
-          })
-          .screenshots({
-            count: 1,
-            timestamps: [seconds],
-            filename: path.basename(tempFramePath),
-            folder: path.dirname(tempFramePath),
-            size: '1280x?',
-          });
-      });
+  ffmpeg(tempVideoPath)
+  .seekInput(seconds)
+  .frames(1)
+  .outputOptions("-q:v 2")
+  .save(tempFramePath)
+  .on("start", (cmd: string) => {
+    console.log("FFmpeg command:", cmd);
+  })
+  .on("stderr", (line: string) => {
+    console.log("FFmpeg:", line);
+  })
+  .on("end", () => {
+    console.log("Frame extracted successfully");
+    resolve();
+  })
+  .on("error", (err: Error) => {
+    console.error("FFmpeg error:", err);
+    reject(err);
+  })
+    // .run();
+});
 
-      // Read the extracted frame
-      const frameBuffer = await import('fs/promises').then((fs) =>
-        fs.readFile(tempFramePath)
-      );
+const fs = await import("fs/promises");
 
-      // Return as data URL (caller can upload to Transloadit if needed)
-      const dataUrl = `data:image/jpeg;base64,${frameBuffer.toString('base64')}`;
+try {
+  await fs.access(tempFramePath);
+} catch {
+  throw new Error("FFmpeg did not produce frame file");
+}
+
+const frameBuffer = await fs.readFile(tempFramePath);
+
+const dataUrl = `data:image/jpeg;base64,${frameBuffer.toString("base64")}`;
 
       // Cleanup temp files
       await unlink(tempVideoPath).catch(() => {});

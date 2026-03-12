@@ -12,6 +12,8 @@ export function ExtractFrameNode({ id, data }: NodeProps<NodeData>) {
   const [timestamp, setTimestamp] = useState(data.timestamp || 0);
   const [output, setOutput] = useState(data.output || '');
   const { updateNodeData, nodes, edges } = useWorkflowStore();
+  
+  
 
   // Get connected inputs (read-only, don't update store)
   const connectedInputs = (() => {
@@ -68,22 +70,37 @@ export function ExtractFrameNode({ id, data }: NodeProps<NodeData>) {
     setRunning(true);
     updateNodeData(id, { running: true });
     try {
-      const response = await fetch('/api/video/extract-frame', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          videoUrl: effectiveVideoUrl,
-          timestamp,
-        }),
-      });
+      const response = await fetch('/api/workflow/execute', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nodeIds: [id],
+        type: "single",
+        nodes,
+        edges
+      }),
+    });
       const result = await response.json();
-      if (!response.ok) {
-        throw new Error(result.error || 'Extract frame failed');
-      }
-      const frameUrl = result.frameUrl ?? result.output;
-      const outputVal = result.output ?? frameUrl;
-      setOutput(outputVal);
-      updateNodeData(id, { output: outputVal, frameUrl: frameUrl ?? outputVal, running: false });
+      console.log(result);
+
+if (!response.ok) {
+  throw new Error(result.error || 'Extract frame failed');
+}
+
+const nodeResult = result.nodeResults?.[0];
+const outputVal = nodeResult?.outputs?.output;
+
+if (!outputVal) {
+  throw new Error("No frame returned from workflow");
+}
+
+setOutput(outputVal);
+
+updateNodeData(id, {
+  output: outputVal,
+  frameUrl: outputVal,
+  running: false
+});
     } catch (error) {
       if (process.env.NODE_ENV === 'development') {
         console.error('Extract frame error:', error);
@@ -93,7 +110,7 @@ export function ExtractFrameNode({ id, data }: NodeProps<NodeData>) {
     } finally {
       setRunning(false);
     }
-  }, [id, effectiveVideoUrl, timestamp, updateNodeData, hasVideoConnection]);
+  }, [id, effectiveVideoUrl, timestamp, updateNodeData, hasVideoConnection, nodes, edges]);
 
   return (
     <BaseNode data={data}>

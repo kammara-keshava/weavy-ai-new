@@ -10,6 +10,8 @@ const executeWorkflowSchema = z.object({
   nodeIds: z.array(z.string()),
   type: z.enum(['full', 'partial', 'single']),
   workflowId: z.string().optional(),
+  nodes: z.any().optional(),
+  edges: z.any().optional(),
 });
 
 export async function POST(request: NextRequest) {
@@ -44,8 +46,8 @@ export async function POST(request: NextRequest) {
       : null;
 
     const workflowData = workflow
-      ? (workflow.data as any)
-      : { nodes: [], edges: [] };
+  ? (workflow.data as any)
+  : { nodes: validated.nodes || [], edges: validated.edges || [] };
 
     const nodes = workflowData?.nodes || [];
     const edges = workflowData?.edges || [];
