@@ -1,4 +1,4 @@
-import "server-only";
+// import "server-only";
 import { WorkflowNode, WorkflowEdge } from '@/types/workflow';
 import { WorkflowExecutionResult, NodeExecutionResult, ExecutionType } from '@/types/execution';
 import { tasks, runs } from "@trigger.dev/sdk/v3";
