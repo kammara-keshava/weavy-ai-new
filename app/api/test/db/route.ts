@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -8,6 +7,17 @@ export const dynamic = 'force-dynamic';
  * GET /api/test/db
  */
 export async function GET(request: NextRequest) {
+  // prevent build-time errors when the database URL is not provided
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json(
+      { error: 'DATABASE_URL not set, skipping database tests' },
+      { status: 500 }
+    );
+  }
+
+  // import prisma on demand so that initialization happens at runtime only
+  const { prisma } = await import('@/lib/prisma');
+
   const results: Record<string, any> = {
     timestamp: new Date().toISOString(),
     nodeEnv: process.env.NODE_ENV,
