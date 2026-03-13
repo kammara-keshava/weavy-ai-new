@@ -3,10 +3,13 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 export const runtime = "nodejs";
+export const maxDuration = 30; // Increase timeout for database queries
+
 export async function GET(request: NextRequest) {
-  const { auth } = await import('@clerk/nextjs/server');
-  const { prisma } = await import('@/lib/prisma');
   try {
+    const { auth } = await import('@clerk/nextjs/server');
+    const { prisma } = await import('@/lib/prisma');
+
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -22,7 +25,7 @@ export async function GET(request: NextRequest) {
       console.log('[History API] prisma.user.findUnique result:', user ? { id: user.id, clerkId: user.clerkId } : null);
     } catch (dbError) {
       console.error("Database error finding user:", dbError);
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({ error: 'Database error', data: [] }, { status: 200 });
     }
 
     if (!user) {
@@ -42,12 +45,12 @@ export async function GET(request: NextRequest) {
       console.log('[History API] fetched runs count for user', user.id, ':', runs.length);
     } catch (dbError) {
       console.error("Database error fetching history:", dbError);
-      return NextResponse.json([], { status: 200 });
+      return NextResponse.json({ error: 'Database error', data: [] }, { status: 200 });
     }
 
     return NextResponse.json(runs);
   } catch (error) {
     console.error('Get history error:', error);
-    return NextResponse.json([]);
+    return NextResponse.json({ error: 'Internal server error', data: [] }, { status: 500 });
   }
 }
