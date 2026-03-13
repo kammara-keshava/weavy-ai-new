@@ -21,31 +21,36 @@ export class WorkflowExecutor {
   payload: Record<string, any>
 ): Promise<Record<string, any>> {
 
-  // trigger the task
-  const run = await tasks.trigger(taskId, payload);
+  try {
+    // trigger the task
+    const run = await tasks.trigger(taskId, payload);
 
-  // poll until the run finishes
-  while (true) {
-    const result = await runs.retrieve(run.id);
+    // poll until the run finishes
+    while (true) {
+      const result = await runs.retrieve(run.id);
 
-    if (result.status === "COMPLETED") {
-      if (!result.output) {
-        throw new Error("Trigger.dev task returned no output");
+      if (result.status === "COMPLETED") {
+        if (!result.output) {
+          throw new Error("Trigger.dev task returned no output");
+        }
+        return result.output as Record<string, any>;
       }
-      return result.output as Record<string, any>;
+
+      if (result.status === "FAILED") {
+        const err =
+          typeof result.error === "string"
+            ? result.error
+            : result.error?.message || "Trigger.dev task failed";
+
+        throw new Error(err);
+      }
+
+      // wait before checking again
+      await new Promise((r) => setTimeout(r, 1000));
     }
-
-  if (result.status === "FAILED") {
-  const err =
-    typeof result.error === "string"
-      ? result.error
-      : result.error?.message || "Trigger.dev task failed";
-
-  throw new Error(err);
-}
-
-    // wait before checking again
-    await new Promise((r) => setTimeout(r, 1000));
+  } catch (error) {
+    console.error(`Trigger.dev task ${taskId} error:`, error);
+    throw new Error(`Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}. Make sure Trigger.dev is deployed with 'npx trigger.dev@latest deploy'`);
   }
 }
 
@@ -263,9 +268,14 @@ export class WorkflowExecutor {
           break;
       }
     } catch (e: any) {
-  console.error("ExtractFrame task error:", e);
-  error = e?.message || JSON.stringify(e) || 'Unknown error during node execution';
-}
+      console.error(`Node ${node.id} (${node.data.type}) execution error:`, e);
+      error = e?.message || JSON.stringify(e) || 'Unknown error during node execution';
+      
+      // Add helpful message for Trigger.dev errors
+      if (error.includes('404') || error.includes('not found')) {
+        error = `${error}. Trigger.dev tasks may not be deployed. Run: npx trigger.dev@latest deploy`;
+      }
+    }
 
     const duration = Date.now() - startTime;
 
