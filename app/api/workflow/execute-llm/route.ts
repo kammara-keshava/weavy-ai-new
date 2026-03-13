@@ -53,7 +53,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: msg }, { status: 400 });
     }
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Failed to execute LLM';
+    const message = error instanceof Error ? error.message : 'LLM';
     return NextResponse.json({ error: message }, { status: 400 });
   }
 }

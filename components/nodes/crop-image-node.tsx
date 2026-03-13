@@ -206,7 +206,7 @@ export function CropImageNode({ id, data }: NodeProps<NodeData>) {
         <button
           onClick={handleRun}
           disabled={running || (!data.image_url && !hasImageConnection)}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-pink-600 text-white rounded-lg hover:bg-pink-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all text-sm font-semibold btn-primary"
         >
           {running ? (
             <>
@@ -222,13 +222,13 @@ export function CropImageNode({ id, data }: NodeProps<NodeData>) {
         </button>
 
         {output && (
-          <div className="mt-3">
+          <div className="mt-3 p-2 rounded" style={{ backgroundColor: 'var(--input-bg)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- dynamic output data URL */}
             <img
               src={output}
               alt="Cropped"
               className="w-full h-auto rounded border max-h-[200px] object-contain"
-              style={{ borderColor: 'var(--panel-border)' }}
+              style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--canvas-bg)' }}
             />
           </div>
         )}

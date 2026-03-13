@@ -132,60 +132,60 @@ export function WorkflowControls() {
 
   return (
     <div
-      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex items-center gap-2 border rounded-lg shadow-lg p-2"
+      className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10 flex flex-wrap items-center justify-center gap-2 border rounded-xl shadow-2xl p-2 max-w-[95vw] sm:max-w-none pointer-events-auto"
       style={{ backgroundColor: 'var(--node-bg)', borderColor: 'var(--panel-border)' }}
     >
       <button
         onClick={handleRunFull}
         disabled={running || nodes.length === 0}
-        className="flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg transition-all text-xs sm:text-sm font-semibold btn-primary whitespace-nowrap"
       >
         {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-        Run Full Workflow
+        <span className="hidden xs:inline">Run Full</span>
       </button>
 
       <button
         onClick={handleRunSelected}
         disabled={running || selectedNodes.length === 0}
-        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+        className="flex items-center gap-2 px-3 sm:px-5 py-2 sm:py-2.5 rounded-lg transition-all text-xs sm:text-sm font-semibold btn-secondary whitespace-nowrap"
       >
         {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-        Run Selected ({selectedNodes.length})
+        <span className="hidden xs:inline">Selected</span> ({selectedNodes.length})
       </button>
 
       <button
         onClick={handleRunSingle}
         disabled={running || selectedNodes.length !== 1}
-        className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+        className="hidden sm:flex items-center gap-2 px-5 py-2.5 rounded-lg transition-all text-sm font-semibold btn-secondary"
       >
         {running ? <Loader2 className="w-4 h-4 animate-spin" /> : <Play className="w-4 h-4" />}
-        Run Single Node
+        Single
       </button>
 
-      <div className="w-px h-6" style={{ backgroundColor: 'var(--panel-border)' }} />
+      <div className="hidden sm:block w-px h-6" style={{ backgroundColor: 'var(--panel-border)' }} />
 
       <button
         onClick={handleSave}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all text-xs sm:text-sm font-semibold btn-secondary"
       >
         <Save className="w-4 h-4" />
-        Save
+        <span className="hidden sm:inline">Save</span>
       </button>
 
       <button
         onClick={handleExport}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all text-xs sm:text-sm font-semibold btn-secondary"
       >
         <Download className="w-4 h-4" />
-        Export
+        <span className="hidden sm:inline">Export</span>
       </button>
 
       <button
         onClick={handleImport}
-        className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors text-sm font-medium"
+        className="flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg transition-all text-xs sm:text-sm font-semibold btn-secondary"
       >
         <Upload className="w-4 h-4" />
-        Import
+        <span className="hidden sm:inline">Import</span>
       </button>
     </div>
   );

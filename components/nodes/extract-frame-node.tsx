@@ -163,7 +163,7 @@ updateNodeData(id, {
         <button
           onClick={handleRun}
           disabled={running || !effectiveVideoUrl}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-cyan-600 text-white rounded-lg hover:bg-cyan-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all text-sm font-semibold btn-primary"
         >
           {running ? (
             <>
@@ -179,13 +179,13 @@ updateNodeData(id, {
         </button>
 
         {(data.frameUrl || output) && (
-          <div className="mt-3">
+          <div className="mt-3 p-2 rounded" style={{ backgroundColor: 'var(--input-bg)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- dynamic frame preview */}
             <img
               src={data.frameUrl || output}
               alt="Extracted frame"
               className="w-full h-auto rounded border max-h-[200px] object-contain"
-              style={{ borderColor: 'var(--panel-border)' }}
+              style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--canvas-bg)' }}
             />
           </div>
         )}

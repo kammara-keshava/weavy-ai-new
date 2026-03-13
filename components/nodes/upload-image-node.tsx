@@ -80,13 +80,13 @@ export function UploadImageNode({ id, data }: NodeProps<NodeData>) {
         )}
 
         {data.imageUrl && !uploading && (
-          <div className="mt-2">
+          <div className="mt-2 p-2 rounded" style={{ backgroundColor: 'var(--input-bg)' }}>
             {/* eslint-disable-next-line @next/next/no-img-element -- user uploaded image preview */}
             <img
               src={data.imageUrl}
               alt="Uploaded"
               className="w-full h-auto rounded border max-h-[200px] object-contain"
-              style={{ borderColor: 'var(--panel-border)' }}
+              style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--canvas-bg)' }}
             />
             {data.fileName && (
               <p className="mt-1 text-xs truncate" style={{ color: 'var(--muted)' }}>{data.fileName}</p>

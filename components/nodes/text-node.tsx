@@ -22,11 +22,11 @@ export function TextNode({ id, data }: NodeProps<NodeData>) {
         value={data.text || ''}
         onChange={handleChange}
         placeholder="Enter text..."
-        className="w-full min-h-[80px] px-3 py-2 rounded text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none"
+        className="w-full min-h-[80px] px-3 py-2.5 rounded-lg text-sm font-medium resize-none"
         style={{ border: '1px solid var(--panel-border)', backgroundColor: 'var(--input-bg)', color: 'var(--foreground)' }}
       />
       {data.text && (
-        <div className="mt-2 text-xs" style={{ color: 'var(--muted)' }}>
+        <div className="mt-2 text-xs font-medium" style={{ color: 'var(--muted)' }}>
           Output: {data.text.substring(0, 50)}
           {data.text.length > 50 && '...'}
         </div>

@@ -117,14 +117,14 @@ export function RightSidebar() {
   };
 
   return (
-    <div className="w-80 border-l flex flex-col h-full" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--panel-border)' }}>
-      <div className="p-4 border-b" style={{ borderColor: 'var(--panel-border)' }}>
-        <h2 className="font-semibold" style={{ color: 'var(--foreground)' }}>Workflow History</h2>
+    <div className="w-full lg:w-80 border-l flex flex-col h-full overflow-hidden" style={{ backgroundColor: 'var(--sidebar-bg)', borderColor: 'var(--panel-border)' }}>
+      <div className="p-3 sm:p-4 border-b flex-shrink-0" style={{ borderColor: 'var(--panel-border)' }}>
+        <h2 className="font-semibold text-sm sm:text-base" style={{ color: 'var(--foreground)' }}>Workflow History</h2>
       </div>
 
       <div className="flex-1 overflow-y-auto">
         {runs.length === 0 ? (
-          <div className="p-4 text-center text-sm" style={{ color: 'var(--muted)' }}>
+          <div className="p-4 text-center text-xs sm:text-sm" style={{ color: 'var(--muted)' }}>
             No workflow runs yet. Execute a workflow to see history.
           </div>
         ) : (
@@ -133,7 +133,7 @@ export function RightSidebar() {
               <div
                 key={run.id}
                 onClick={() => setSelectedRun(run.id)}
-                className="p-4 cursor-pointer transition-colors"
+                className="p-3 sm:p-4 cursor-pointer transition-colors"
                 style={{
                   backgroundColor: selectedRun === run.id ? 'var(--input-bg)' : 'transparent',
                 }}
@@ -151,7 +151,7 @@ export function RightSidebar() {
                 </div>
                 <div className="flex items-center gap-2 text-xs mb-1" style={{ color: 'var(--muted)' }}>
                   <Clock className="w-3 h-3" />
-                  <span>{formatTimestamp(run.timestamp)}</span>
+                  <span className="truncate">{formatTimestamp(run.timestamp)}</span>
                 </div>
                 <div className="text-xs" style={{ color: 'var(--muted)' }}>
                   {run.type === 'full' && 'Full Workflow'}
@@ -166,22 +166,22 @@ export function RightSidebar() {
       </div>
 
       {selectedRun && nodeExecutions[selectedRun] && (
-        <div className="border-t p-4 max-h-96 overflow-y-auto" style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--node-bg)' }}>
-          <h3 className="font-semibold text-sm mb-3" style={{ color: 'var(--foreground)' }}>
+        <div className="border-t p-3 sm:p-4 max-h-64 sm:max-h-96 overflow-y-auto flex-shrink-0" style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--node-bg)' }}>
+          <h3 className="font-semibold text-xs sm:text-sm mb-3" style={{ color: 'var(--foreground)' }}>
             Node Execution Details
           </h3>
           <div className="space-y-3">
             {nodeExecutions[selectedRun].map((exec, idx) => (
-              <div key={idx} className="border rounded-lg p-3" style={{ borderColor: 'var(--panel-border)' }}>
+              <div key={idx} className="border rounded-lg p-2 sm:p-3" style={{ borderColor: 'var(--panel-border)' }}>
                 <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2 min-w-0">
                     {getStatusIcon(exec.status)}
-                    <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>
-                      {exec.nodeType} ({exec.nodeId})
+                    <span className="text-xs sm:text-sm font-medium truncate" style={{ color: 'var(--foreground)' }}>
+                      {exec.nodeType}
                     </span>
                   </div>
                   {exec.duration && (
-                    <span className="text-xs" style={{ color: 'var(--muted)' }}>
+                    <span className="text-xs flex-shrink-0 ml-2" style={{ color: 'var(--muted)' }}>
                       {formatDuration(exec.duration)}
                     </span>
                   )}
@@ -189,7 +189,7 @@ export function RightSidebar() {
                 {exec.outputs && (
                   <div className="mt-2 text-xs" style={{ color: 'var(--foreground)' }}>
                     <div className="font-medium mb-1">Output:</div>
-                    <pre className="p-2 rounded text-xs overflow-x-auto" style={{ backgroundColor: 'var(--input-bg)' }}>
+                    <pre className="p-2 rounded text-xs overflow-x-auto max-h-32" style={{ backgroundColor: 'var(--input-bg)' }}>
                       {JSON.stringify(exec.outputs, null, 2)}
                     </pre>
                   </div>
@@ -197,7 +197,7 @@ export function RightSidebar() {
                 {exec.error && (
                   <div className="mt-2 text-xs text-red-600">
                     <div className="font-medium mb-1">Error:</div>
-                    <div className="bg-red-50 p-2 rounded dark:bg-red-900/20">{exec.error}</div>
+                    <div className="bg-red-50 p-2 rounded dark:bg-red-900/20 text-xs break-words">{exec.error}</div>
                   </div>
                 )}
               </div>

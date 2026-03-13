@@ -172,7 +172,7 @@ export function LLMNode({ id, data }: NodeProps<NodeData>) {
         <button
           onClick={handleRun}
           disabled={running || !effectiveUserMessage}
-          className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+          className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg transition-all text-sm font-semibold btn-primary"
         >
           {running ? (
             <>

@@ -75,14 +75,14 @@ export function LeftSidebar() {
             placeholder="Search nodes..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-4 py-2.5 border rounded-lg text-sm font-medium"
             style={{ backgroundColor: 'var(--input-bg)', borderColor: 'var(--panel-border)', color: 'var(--foreground)' }}
           />
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4">
-        <h3 className="text-xs font-semibold uppercase mb-3" style={{ color: 'var(--muted)' }}>Quick Access</h3>
+        <h3 className="text-xs font-bold uppercase tracking-wider mb-4" style={{ color: 'var(--muted)' }}>Nodes</h3>
         <div className="space-y-2">
           {filteredNodes.map(([key, definition]) => {
             const Icon = iconMap[definition.icon] || Type;
@@ -90,16 +90,16 @@ export function LeftSidebar() {
               <button
                 key={key}
                 onClick={() => handleAddNode(key)}
-                className="w-full flex items-center gap-3 px-4 py-3 border rounded-lg hover:border-purple-500 hover:shadow-sm transition-all text-left group"
-                style={{ backgroundColor: 'var(--node-bg)', borderColor: 'var(--panel-border)' }}
+                className="w-full flex items-center gap-3 px-4 py-3.5 border rounded-lg transition-all text-left group btn-secondary"
+                style={{ backgroundColor: 'var(--node-bg)' }}
               >
                 <div
-                  className="w-8 h-8 rounded flex items-center justify-center"
-                  style={{ backgroundColor: `${definition.color}20` }}
+                  className="w-9 h-9 rounded-lg flex items-center justify-center transition-all"
+                  style={{ backgroundColor: 'var(--sidebar-bg)' }}
                 >
-                  <Icon className="w-4 h-4" style={{ color: definition.color }} />
+                  <Icon className="w-5 h-5" style={{ color: 'var(--foreground)' }} />
                 </div>
-                <span className="text-sm font-medium" style={{ color: 'var(--foreground)' }}>{definition.label}</span>
+                <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{definition.label}</span>
               </button>
             );
           })}

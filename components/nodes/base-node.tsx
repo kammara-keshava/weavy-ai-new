@@ -17,16 +17,16 @@ export function BaseNode({ data, children }: BaseNodeProps) {
 
   return (
     <div
-      className={`border-2 rounded-lg shadow-sm min-w-[200px] ${
+      className={`border-2 rounded-xl shadow-lg min-w-[220px] transition-all ${
         isRunning ? 'node-running' : ''
       }`}
-      style={{ borderColor: definition.color, backgroundColor: 'var(--node-bg)' }}
+      style={{ borderColor: 'var(--foreground)', backgroundColor: 'var(--node-bg)', cursor: 'grab' }}
     >
       <div
-        className="px-4 py-2 border-b flex items-center gap-2"
-        style={{ borderColor: `${definition.color}20`, backgroundColor: `${definition.color}10` }}
+        className="px-5 py-3 border-b flex items-center gap-2 cursor-grab active:cursor-grabbing"
+        style={{ borderColor: 'var(--panel-border)', backgroundColor: 'var(--sidebar-bg)' }}
       >
-        <span className="text-sm font-semibold" style={{ color: 'var(--foreground)' }}>{data.label || definition.label}</span>
+        <span className="text-sm font-bold tracking-tight select-none" style={{ color: 'var(--foreground)' }}>{data.label || definition.label}</span>
       </div>
 
       <div className="p-4 nodrag nopan">
@@ -44,9 +44,6 @@ export function BaseNode({ data, children }: BaseNodeProps) {
             position={Position.Top}
             id={input.id}
             style={{
-              backgroundColor: definition.color,
-              borderColor: 'white',
-              borderWidth: 2,
               left: left,
               transform: 'translateX(-50%)',
             }}
@@ -65,9 +62,6 @@ export function BaseNode({ data, children }: BaseNodeProps) {
             position={Position.Bottom}
             id={output.id}
             style={{
-              backgroundColor: definition.color,
-              borderColor: 'white',
-              borderWidth: 2,
               left: left,
               transform: 'translateX(-50%)',
             }}
