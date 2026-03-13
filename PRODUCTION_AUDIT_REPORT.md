@@ -403,7 +403,7 @@ TRANSLOADIT_KEY=0891337f6cf2be54f1443c9bfe3b05ea
 TRANSLOADIT_SECRET=f34c4923e50f477e7702b618dd4cf3e90aecf3ff
 ```
 
-**All variables already set in `.env.local` ✅**
+**All variables already set in `.env` ✅**
 
 ---
 

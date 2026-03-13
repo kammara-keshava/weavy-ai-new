@@ -51,6 +51,4 @@ public/frames/
 *.avi
 *.mkv
 *.webm
-.env
-.env.local
 .trigger/

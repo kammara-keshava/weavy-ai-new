@@ -14,9 +14,9 @@ PROJECT_ROOT="$PWD"
 
 # Step 1: Verify environment setup
 echo "Step 1: Verifying environment configuration..."
-if [ -f ".env.local" ]; then
-    echo "✅ .env.local found"
-    DATABASE_URL=$(grep "^DATABASE_URL" .env.local | cut -d'=' -f2 | tr -d '"')
+if [ -f ".env" ]; then
+    echo "✅ .env found"
+    DATABASE_URL=$(grep "^DATABASE_URL" .env | cut -d'=' -f2 | tr -d '"')
     echo "   URL: ${DATABASE_URL:0:60}..."
     
     # Check if using Session Pooler
@@ -27,7 +27,7 @@ if [ -f ".env.local" ]; then
         exit 1
     fi
 else
-    echo "❌ .env.local not found!"
+    echo "❌ .env not found!"
     exit 1
 fi
 

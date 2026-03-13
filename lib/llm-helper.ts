@@ -44,7 +44,7 @@ function isNotFoundError(err: unknown): boolean {
 export async function runLLM(input: LLMInput): Promise<string> {
   if (!process.env.GOOGLE_AI_API_KEY) {
     throw new LLMExecutionError(
-      "GOOGLE_AI_API_KEY missing. Add it to .env.local",
+      "GOOGLE_AI_API_KEY missing. Add it to .env",
       503
     );
   }
