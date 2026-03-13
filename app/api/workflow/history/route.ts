@@ -10,6 +10,15 @@ export async function GET(request: NextRequest) {
     const { auth } = await import('@clerk/nextjs/server');
     const { prisma } = await import('@/lib/prisma');
 
+    // Test database connection first
+    try {
+      await prisma.$queryRaw`SELECT 1 as test`;
+      console.log('[History API] Database connection test passed');
+    } catch (dbError) {
+      console.error('[History API] Database connection test failed:', dbError);
+      return NextResponse.json({ error: 'Database connection failed', data: [] }, { status: 500 });
+    }
+
     const { userId } = await auth();
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -40,7 +49,7 @@ export async function GET(request: NextRequest) {
           nodes: true,
         },
         orderBy: { createdAt: 'desc' },
-        take: 50,
+        take: 10, // Reduced from 50 to prevent large responses
       });
       console.log('[History API] fetched runs count for user', user.id, ':', runs.length);
     } catch (dbError) {
