@@ -98,7 +98,7 @@ export function CropImageNode({ id, data }: NodeProps<NodeData>) {
     } finally {
       setRunning(false);
     }
-  }, [id, effectiveImageUrl, xPercent, yPercent, widthPercent, heightPercent, updateNodeData]);
+  }, [id, effectiveImageUrl, updateNodeData, nodes, edges]);
 
   return (
     <BaseNode data={data}>

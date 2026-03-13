@@ -110,7 +110,7 @@ updateNodeData(id, {
     } finally {
       setRunning(false);
     }
-  }, [id, effectiveVideoUrl, timestamp, updateNodeData, hasVideoConnection, nodes, edges]);
+  }, [id, effectiveVideoUrl, updateNodeData, hasVideoConnection, nodes, edges]);
 
   return (
     <BaseNode data={data}>

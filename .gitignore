@@ -15,6 +15,7 @@
 
 # misc
 .DS_Store
+**/.DS_Store
 *.pem
 
 # debug
@@ -44,11 +45,6 @@ public/frames/
 *.avi
 *.mkv
 *.webm
-public/uploads/
-public/frames/
-*.mp4
-*.mov
-*.avi
-*.mkv
-*.webm
+
+# Trigger.dev
 .trigger/

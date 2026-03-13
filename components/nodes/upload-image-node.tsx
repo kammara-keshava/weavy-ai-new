@@ -81,6 +81,7 @@ export function UploadImageNode({ id, data }: NodeProps<NodeData>) {
 
         {data.imageUrl && !uploading && (
           <div className="mt-2">
+            {/* eslint-disable-next-line @next/next/no-img-element -- user uploaded image preview */}
             <img
               src={data.imageUrl}
               alt="Uploaded"
