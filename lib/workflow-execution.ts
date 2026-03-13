@@ -269,11 +269,13 @@ export class WorkflowExecutor {
       }
     } catch (e: any) {
       console.error(`Node ${node.id} (${node.data.type}) execution error:`, e);
-      error = e?.message || JSON.stringify(e) || 'Unknown error during node execution';
+      const errorMessage = e?.message || JSON.stringify(e) || 'Unknown error during node execution';
       
       // Add helpful message for Trigger.dev errors
-      if (error.includes('404') || error.includes('not found')) {
-        error = `${error}. Trigger.dev tasks may not be deployed. Run: npx trigger.dev@latest deploy`;
+      if (errorMessage.includes('404') || errorMessage.includes('not found')) {
+        error = `${errorMessage}. Trigger.dev tasks may not be deployed. Run: npx trigger.dev@latest deploy`;
+      } else {
+        error = errorMessage;
       }
     }
 
