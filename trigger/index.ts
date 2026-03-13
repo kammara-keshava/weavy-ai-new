@@ -45,7 +45,8 @@ export const executeLLMTask = task({
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: GEMINI_MODEL });
+    const modelName = payload.model || GEMINI_MODEL;
+    const model = genAI.getGenerativeModel({ model: modelName });
 
     let prompt = payload.userMessage;
     if (payload.systemPrompt) {
@@ -57,20 +58,25 @@ export const executeLLMTask = task({
     // Add images if provided
     if (payload.images && payload.images.length > 0) {
       for (const imageUrl of payload.images) {
-        const imageResponse = await fetch(imageUrl);
-        if (!imageResponse.ok) {
-          throw new Error(`Failed to fetch image: ${imageUrl}`);
-        }
-        const imageBuffer = await imageResponse.arrayBuffer();
-        const base64Image = Buffer.from(imageBuffer).toString('base64');
-        const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
+        try {
+          const imageResponse = await fetch(imageUrl);
+          if (!imageResponse.ok) {
+            console.warn(`Failed to fetch image: ${imageUrl}`);
+            continue;
+          }
+          const imageBuffer = await imageResponse.arrayBuffer();
+          const base64Image = Buffer.from(imageBuffer).toString('base64');
+          const mimeType = imageResponse.headers.get('content-type') || 'image/jpeg';
 
-        parts.push({
-          inlineData: {
-            data: base64Image,
-            mimeType: mimeType,
-          },
-        });
+          parts.push({
+            inlineData: {
+              data: base64Image,
+              mimeType: mimeType,
+            },
+          });
+        } catch (error) {
+          console.warn(`Error processing image ${imageUrl}:`, error);
+        }
       }
     }
 
@@ -199,27 +205,26 @@ export const executeExtractFrameTask = task({
       }
       // Extract frame using FFmpeg
       await new Promise<void>((resolve, reject) => {
-  ffmpeg(tempVideoPath)
-  .seekInput(seconds)
-  .frames(1)
-  .outputOptions("-q:v 2")
-  .save(tempFramePath)
-  .on("start", (cmd: string) => {
-    console.log("FFmpeg command:", cmd);
-  })
-  .on("stderr", (line: string) => {
-    console.log("FFmpeg:", line);
-  })
-  .on("end", () => {
-    console.log("Frame extracted successfully");
-    resolve();
-  })
-  .on("error", (err: Error) => {
-    console.error("FFmpeg error:", err);
-    reject(err);
-  })
-    // .run();
-});
+        ffmpeg(tempVideoPath)
+          .seekInput(seconds)
+          .frames(1)
+          .outputOptions("-q:v 2")
+          .save(tempFramePath)
+          .on("start", (cmd: string) => {
+            console.log("FFmpeg command:", cmd);
+          })
+          .on("stderr", (line: string) => {
+            console.log("FFmpeg:", line);
+          })
+          .on("end", () => {
+            console.log("Frame extracted successfully");
+            resolve();
+          })
+          .on("error", (err: Error) => {
+            console.error("FFmpeg error:", err);
+            reject(err);
+          });
+      });
 
 const fs = await import("fs/promises");
 
