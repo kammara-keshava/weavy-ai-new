@@ -15,4 +15,12 @@ export const config: TriggerConfig = {
     },
   },
   dirs: ['./trigger'],
+  build: {
+    extensions: [
+      {
+        name: 'ffmpeg',
+        image: 'ghcr.io/triggerdotdev/ffmpeg:latest',
+      },
+    ],
+  },
 };
