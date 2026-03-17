@@ -17,42 +17,53 @@ export class WorkflowExecutor {
    * Trigger a Trigger.dev task via HTTP API
    */
   private async triggerTask(
-  taskId: string,
-  payload: Record<string, any>
-): Promise<Record<string, any>> {
+    taskId: string,
+    payload: Record<string, any>
+  ): Promise<Record<string, any>> {
+    try {
+      // Trigger and wait using the SDK's built-in polling (handles backoff automatically)
+      const handle = await tasks.trigger(taskId, payload);
 
-  try {
-    // trigger the task
-    const run = await tasks.trigger(taskId, payload);
+      // Poll with timeout — max 270s to stay within Vercel's 300s function limit
+      const timeoutMs = 270_000;
+      const pollInterval = 2_000;
+      const deadline = Date.now() + timeoutMs;
 
-    // poll until the run finishes
-    while (true) {
-      const result = await runs.retrieve(run.id);
+      while (Date.now() < deadline) {
+        const result = await runs.retrieve(handle.id);
 
-      if (result.status === "COMPLETED") {
-        if (!result.output) {
-          throw new Error("Trigger.dev task returned no output");
+        if (result.status === "COMPLETED") {
+          if (!result.output) {
+            throw new Error("Trigger.dev task returned no output");
+          }
+          return result.output as Record<string, any>;
         }
-        return result.output as Record<string, any>;
+
+        if (
+          result.status === "FAILED" ||
+          result.status === "CRASHED" ||
+          result.status === "CANCELED" ||
+          result.status === "SYSTEM_FAILURE" ||
+          result.status === "TIMED_OUT"
+        ) {
+          const err =
+            typeof result.error === "string"
+              ? result.error
+              : (result.error as any)?.message || `Trigger.dev task ${result.status}`;
+          throw new Error(err);
+        }
+
+        await new Promise((r) => setTimeout(r, pollInterval));
       }
 
-      if (result.status === "FAILED") {
-        const err =
-          typeof result.error === "string"
-            ? result.error
-            : result.error?.message || "Trigger.dev task failed";
-
-        throw new Error(err);
-      }
-
-      // wait before checking again
-      await new Promise((r) => setTimeout(r, 1000));
+      throw new Error(`Task ${taskId} timed out after ${timeoutMs / 1000}s`);
+    } catch (error) {
+      console.error(`Trigger.dev task ${taskId} error:`, error);
+      throw new Error(
+        `Task ${taskId} failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
-  } catch (error) {
-    console.error(`Trigger.dev task ${taskId} error:`, error);
-    throw new Error(`Task ${taskId} failed: ${error instanceof Error ? error.message : 'Unknown error'}. Make sure Trigger.dev is deployed with 'npx trigger.dev@latest deploy'`);
   }
-}
 
   /**
    * Get all nodes that a given node depends on (upstream dependencies)
